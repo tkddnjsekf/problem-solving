@@ -1,113 +1,91 @@
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <string.h>
+#include <iostream>
+#include <vector>
+#include <map>
+#include <cmath>
+#include <conio.h>
 
-int romanToDecimal(char* roman) {
-    int i, decimal = 0, len = strlen(roman);
-    int prev = 0, curr = 0, count = 0;
-    int prev_char = 0;
+using namespace std;
 
-    for (i = 0; i < len; i++) {
-        switch (roman[i]) {
-        case 'I':
-            curr = 1;
-            break;
-        case 'V':
-            curr = 5;
-            break;
-        case 'X':
-            curr = 10;
-            break;
-        case 'L':
-            curr = 50;
-            break;
-        case 'C':
-            curr = 100;
-            break;
-        case 'D':
-            curr = 500;
-            break;
-        case 'M':
-            curr = 1000;
-            break;
-        default:
-            printf("잘못된 입력입니다.\n");
+int roman_to_arabic(string roman) {
+    map<char, int> roman_map = { {'I', 1}, {'V', 5}, {'X', 10}, {'L', 50}, {'C', 100}, {'D', 500}, {'M', 1000} };
+    map<char, int> roman_map2 = { {'I', 10}, {'V', 10}, {'X', 100}, {'L', 100}, {'C', 1000}, {'D', 1000}, {'M', 10000} };
+    vector<int> numGroup;
+    int arabic = 0;
+    char prev = ' ';
+    int sameCount = 0;
+
+    for (char c : roman) {
+        if (c == prev) {
+            sameCount++;
+            if (sameCount == 3) {
+                cout << "잘못된 입력1 - 4연타 중복" << endl;
+                return -1;
+            }
+        }
+        else {
+            sameCount = 0;
+        }
+        if (roman_map.find(c) == roman_map.end()) {
+            cout << "잘못된 입력2 - 로마자가 아님" << endl;
             return -1;
         }
-        if (prev_char && curr != prev_char) {
-            if (!((prev_char == 1 && (curr == 5 || curr == 10)) ||
-                (prev_char == 10 && (curr == 50 || curr == 100)) ||
-                (prev_char == 100 && (curr == 500 || curr == 1000)))) {
-                printf("잘못된 입력입니다.\n");
-                return -1;
-            }
-        }
-
-        // 동일한 문자가 두 개 이상 붙어있는 경우 처리
-        prev_char = curr;
-        if (curr == prev) {
-            count++;
-            if (curr == 5 || curr == 50 || curr == 500) { // LL, VV, DD
-                printf("잘못된 입력입니다.\n");
-                return -1;
-            }
-            else if (count > 3) {
-                printf("잘못된 입력입니다.\n");
-                return -1;
-            }
-        }
-        else {
-            count = 1;
-        }
-
-        if (curr > prev && prev != 0) {
-            if ((curr == 5 && (prev == 1 || prev == 10)) || // IV, IX
-                (curr == 10 && (prev == 1 || prev == 5)) || // XL, XC
-                (curr == 50 && (prev == 1 || prev == 10 || prev == 5 || prev == 100)) || // IL, IC, ID, IM
-                (curr == 100 && (prev == 1 || prev == 10 || prev == 50))) { // CD, CM
-                decimal -= prev;
-                decimal += (curr - prev);
-            }
-            else if ((prev == 100 && (curr == 500 || curr == 1000)) || // CD, CM
-                (prev == 10 && (curr == 50 || curr == 100)) || // XL, XC
-                (prev == 1 && (curr == 5 || curr == 10))) { // IV, IX
-                decimal -= prev;
-                decimal += (curr - prev);
+        if (prev != ' ' && roman_map[c] > roman_map[prev]) {
+            if (roman_map2[c] / roman_map2[prev] <= 10) {
+                arabic += roman_map[c] - 2 * roman_map[prev];
+                numGroup[numGroup.size() - 1] = roman_map[c] - roman_map[prev];
             }
             else {
-                printf("잘못된 입력입니다.\n");
+                cout << "잘못된 입력3 - 음수숫자와 양수숫자의 차이가 너무 큼" << endl;
                 return -1;
             }
         }
         else {
-            decimal += curr;
+            if (arabic + roman_map[c] >= floor(arabic / roman_map2[c]) * roman_map2[c] + roman_map2[c]) {
+                cout << "잘못된 입력4 - 작은 자릿수 숫자로 큰 자릿수 변동시킴" << endl;
+                return -1;
+            }
+            arabic += roman_map[c];
+            numGroup.push_back(roman_map[c]);
         }
-
-        prev = curr;
+        prev = c;
     }
-
-    return decimal;
+    int max = numGroup[0];
+    for (int i = 1; i < numGroup.size(); i++) {
+        if (numGroup[i] > max) {
+            cout << "잘못된 입력5 - 큰수에서 작은 수 순서 위반" << endl;
+            return -1;
+        }
+        max = numGroup[i];
+    }
+    return arabic;
 }
 
 int main() {
-    char roman[20];
-    int decimal;
+    string roman;
 
-    while (1) {
-        printf("로마 숫자를 입력하세요 (1~3999): ");
-        scanf("%s", roman);
-
-        if (strcmp(roman, "esc") == 0) {
-            printf("프로그램을 종료합니다.\n");
-            break;
+    while (true) {
+        roman = "";
+        cout << "로마자 써 (종료하려면 'esc' 입력) ";
+        while (true) {
+            char c = _getch();
+            if (c == 27) {
+                return 0;
+            }
+            else if (c == 13) {
+                break;
+            }
+            else {
+                roman.push_back(c);
+                cout << c;
+            }
         }
+        cout << endl;
 
-        decimal = romanToDecimal(roman);
-        if (decimal != -1) {
-            printf("%s = %d\n", roman, decimal);
+        int arabic = roman_to_arabic(roman);
+        if (arabic != -1) {
+            cout << "답은: " << arabic << endl;
         }
     }
 
     return 0;
 }
-    
