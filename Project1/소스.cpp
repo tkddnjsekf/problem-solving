@@ -74,6 +74,14 @@ int main() {
             else if (c == 13) {
                 break;
             }
+            else if (c == 8) {
+                if (roman.size() > 0) {
+                    cout << c;
+                    cout << " ";
+                    cout << c;
+                    roman.pop_back();
+                }
+            }
             else {
                 roman.push_back(c);
                 cout << c;
