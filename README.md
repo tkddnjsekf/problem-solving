@@ -1,5 +1,3 @@
-# problem-solving
-문제해결능력
 #include <iostream>
 
 #include <cstdlib>
@@ -18,180 +16,218 @@ const int COLS = 10; // 맵의 열 크기
 
 class Map {
 
-private:
+  private: char map[ROWS][COLS];
 
-    char map[ROWS][COLS];
+  int start_x,
 
-    int start_x, start_y;
+  start_y;
 
-    int goal_x, goal_y;
+  int goal_x,
 
-public:
+  goal_y;
 
-    Map() {
+  public: Map() {
 
-        srand(time(NULL));
+    srand(time(NULL));
 
-        for (int i = 0; i < ROWS; i++) {
+    for (int i = 0; i < ROWS; i++) {
 
-            for (int j = 0; j < COLS; j++) {
+      for (int j = 0; j < COLS; j++) {
 
-                map[i][j] = '.';
+        map[i][j] = '.';
 
-            }
-
-        }
-
-        for (int i = 0; i < 10; i++) {
-
-            int x = rand() % ROWS;
-
-            int y = rand() % COLS;
-
-            map[x][y] = 'X';
-
-        }
-
-        do {
-
-            start_x = rand() % ROWS;
-
-            start_y = rand() % COLS;
-
-        } while (map[start_x][start_y] != '.');
-
-        map[start_x][start_y] = 'O';
-
-        do {
-
-            goal_x = rand() % ROWS;
-
-            goal_y = rand() % COLS;
-
-        } while (map[goal_x][goal_y] != '.');
-
-        map[goal_x][goal_y] = 'P';
+      }
 
     }
 
-    void print_map() {
+    for (int i = 0; i < 10; i++) {
 
-        for (int i = 0; i < ROWS; i++) {
+      int x = rand() % ROWS;
 
-            for (int j = 0; j < COLS; j++) {
+      int y = rand() % COLS;
 
-                cout << map[i][j] << ' ';
-
-            }
-
-            cout << endl;
-
-        }
+      map[x][y] = 'X';
 
     }
 
-    int bfs() {
+    do {
 
-        int dx[] = { -1, 0, 1, 0 };
+      start_x = rand() % ROWS;
 
-        int dy[] = { 0, 1, 0, -1 };
+      start_y = rand() % COLS;
 
-        queue<pair<int, int>> q;
+    } while (map[start_x][start_y] != '.');
 
-        int dist[ROWS][COLS] = { 0 };
+    map[start_x][start_y] = 'O';
 
-        q.push({ start_x, start_y });
+    do {
 
-        dist[start_x][start_y] = 1;
+      goal_x = rand() % ROWS;
 
-        while (!q.empty()) {
+      goal_y = rand() % COLS;
 
-            int x = q.front().first;
+    } while (map[goal_x][goal_y] != '.');
 
-            int y = q.front().second;
+    map[goal_x][goal_y] = 'P';
 
-            q.pop();
+  }
 
-            for (int i = 0; i < 4; i++) {
+  void print_map() {
 
-                int nx = x + dx[i];
+    for (int i = 0; i < ROWS; i++) {
 
-                int ny = y + dy[i];
+      for (int j = 0; j < COLS; j++) {
 
-                if (nx >= 0 && nx < ROWS && ny >= 0 && ny < COLS && map[nx][ny] != 'X' && dist[nx][ny] == 0) {
+        cout << map[i][j] << ' ';
 
-                    q.push({ nx, ny });
+      }
 
-                    dist[nx][ny] = dist[x][y] + 1;
+      cout << endl;
 
-                    if (map[nx][ny] == 'P') {
+    }
 
-                        int cx = nx;
+  }
 
-                        int cy = ny;
+  int bfs() {
 
-                        while (map[cx][cy] != 'O') {
+    int dx[] = {
 
-                            map[cx][cy] = '-';
+      -1,
 
-                            for (int j = 0; j < 4; j++) {
+      0,
 
-                                int nx2 = cx + dx[j];
+      1,
 
-                                int ny2 = cy + dy[j];
+      0
 
-                                if (nx2 >= 0 && nx2 < ROWS && ny2 >= 0 && ny2 < COLS && dist[nx2][ny2] == dist[cx][cy] - 1) {
+    };
 
-                                    cx = nx2;
+    int dy[] = {
 
-                                    cy = ny2;
+      0,
 
-                                    break;
+      1,
 
-                            }
+      0,
 
-                        }
+      -1
 
-                    }
+    };
 
-                    return dist[nx][ny] - 1;
+    queue < pair < int, int >> q;
+
+    int dist[ROWS][COLS] = {
+
+      0
+
+    };
+
+    q.push({
+
+      start_x,
+
+      start_y
+
+    });
+
+    dist[start_x][start_y] = 1;
+
+    while (!q.empty()) {
+
+      int x = q.front().first;
+
+      int y = q.front().second;
+
+      q.pop();
+
+      for (int i = 0; i < 4; i++) {
+
+        int nx = x + dx[i];
+
+        int ny = y + dy[i];
+
+        if (nx >= 0 && nx < ROWS && ny >= 0 && ny < COLS && map[nx][ny] != 'X' && dist[nx][ny] == 0) {
+
+          q.push({
+
+            nx,
+
+            ny
+
+          });
+
+          dist[nx][ny] = dist[x][y] + 1;
+
+          if (map[nx][ny] == 'P') {
+
+            int cx = nx;
+
+            int cy = ny;
+
+            while (map[cx][cy] != 'O') {
+
+              if (map[cx][cy] == '.') {
+
+                map[cx][cy] = '-';
+
+              }
+
+              for (int j = 0; j < 4; j++) {
+
+                int nx2 = cx + dx[j];
+
+                int ny2 = cy + dy[j];
+
+                if (nx2 >= 0 && nx2 < ROWS && ny2 >= 0 && ny2 < COLS && dist[nx2][ny2] == dist[cx][cy] - 1) {
+
+                  cx = nx2;
+
+                  cy = ny2;
+
+                  break;
 
                 }
 
+              }
+
             }
 
+            return dist[nx][ny] - 1;
+
+          }
+
         }
+
+      }
 
     }
 
     return -1;
 
-}
+  }
 
 };
 
 int main() {
 
-Map game_map;
+  Map game_map;
 
-int shortest_path = game_map.bfs();
+  int shortest_path = game_map.bfs();
 
-if (shortest_path > 0) {
+  if (shortest_path > 0) {
 
     cout << "최단 거리: " << shortest_path << endl;
 
-}
-
-else {
+  } else {
 
     cout << "경로가 없습니다." << endl;
 
-}
+  }
 
-cout << "===== 맵 =====" << endl;
+  cout << "===== 맵 =====" << endl;
 
-game_map.print_map();
+  game_map.print_map();
 
-return 0;
+  return 0;
 
 }
